@@ -140,7 +140,7 @@ class OnePageAPISamples
     return if @uid.nil? || @api_key.nil?
 
     url_to_sign = @url + api_method
-    params_to_sign = params.empty? ? nil : 
+    params_to_sign = params.empty? ? nil :
     params.to_a.map {|x| x[0] + '=' + URI::escape(x[1].to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
     url_to_sign += '?' + params_to_sign unless params_to_sign.nil? || ['POST', 'PUT'].include?(http_method)
 
