@@ -5,7 +5,7 @@ require 'openssl'
 require 'base64'
 require 'json'
 
-class OnePageAPISamples
+class OnePageAPI
   def initialize(login, password)
     @url = 'https://app.onepagecrm.com/api/v3/'
     @login = login
