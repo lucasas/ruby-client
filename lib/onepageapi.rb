@@ -79,8 +79,8 @@ class OnePageAPI
   # Send GET request
   def get(method, params = {})
     url = URI.parse(@url + method)
-    get_data = params.empty? ? '' : '?' + params.to_a.map {|x| x[0] + '=' +
-    URI::escape(x[1], Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
+    get_data = params.empty? ? '' : '?' + params.to_a.map {|x| x[0].to_s + '=' +
+                                                           URI::escape(x[1].to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
 
     req = Net::HTTP::Get.new(url.path + get_data)
     add_auth_headers(req, 'GET', method, params)
@@ -141,7 +141,7 @@ class OnePageAPI
 
     url_to_sign = @url + api_method
     params_to_sign = params.empty? ? nil :
-    params.to_a.map {|x| x[0] + '=' + URI::escape(x[1].to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
+      params.to_a.map {|x| x[0].to_s + '=' + URI::escape(x[1].to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
     url_to_sign += '?' + params_to_sign unless params_to_sign.nil? || ['POST', 'PUT'].include?(http_method)
 
     timestamp = Time.now.to_i.to_s
