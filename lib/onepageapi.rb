@@ -22,9 +22,9 @@ class OnePageAPI
     auth_data = post('login.json', params)
     @uid = auth_data['data']['user_id']
 
-    # Returns User ID for reference
-    puts 'UID =  ' + @uid
+
     @api_key = Base64::decode64(auth_data['data']['auth_key'])
+    @uid
   end
 
   def bootstrap
