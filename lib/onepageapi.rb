@@ -47,8 +47,8 @@ class OnePageAPI
   end
 
   # Get contacts list
-  def get_contacts_list
-    get('contacts.json')['data']['contacts']
+  def get_contacts_list(params = {})
+    get('contacts.json', params)['data']['contacts']
   end
 
   # Get single contact data
