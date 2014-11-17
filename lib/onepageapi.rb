@@ -63,7 +63,7 @@ class OnePageAPI
 
   # Update contact data
   def update_contact(id, contact_data)
-    put("contacts/#{id}.json", contact_data)['data']
+    put("contacts/#{id}.json?partial=1", contact_data)['data']
   end
 
   # Delete contact
