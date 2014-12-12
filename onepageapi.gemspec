@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "onepageapi"
-  s.version     = "0.0.1"
+  s.version     = "0.0.2"
   s.authors     = ["OnePageCRM"]
   s.homepage    = ""
   s.summary     = "This is a short ruby script to help you get started with the OnePageCRM API v3"
