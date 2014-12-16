@@ -5,7 +5,6 @@ require 'openssl'
 require 'base64'
 require 'json'
 require 'yaml'
-require 'pry'
 require 'uri'
 
 TEST_CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/config.yml")
@@ -34,9 +33,7 @@ class OnePageAPI
 
     auth_data = post('login.json', params)
     @uid = auth_data['data']['user_id']
-
     @api_key = Base64::decode64(auth_data['data']['auth_key'])
-    @uid
   end
 
   def return_uid
@@ -74,7 +71,7 @@ class OnePageAPI
 
   # Create new contact
   def create_contact(contact_data)
-    contacts = post('contacts.json', contact_data)['data']
+    post('contacts.json', contact_data)['data']
   end
 
   # Update contact data
@@ -91,7 +88,6 @@ class OnePageAPI
     post("contacts/#{id}/actions.json", action_data)
   end
 
-
   def get_statuses
     get('statuses.json')
   end
@@ -101,8 +97,8 @@ class OnePageAPI
     url = URI.parse(@url + method)
     get_data = params.empty? ? '' : '?' + params.to_a.map {|x| x[0].to_s + '=' +
                                                            URI::escape(x[1].to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
-    req = Net::HTTP::Get.new(url.request_uri)
 
+    req = Net::HTTP::Get.new(url.path + get_data)
     add_auth_headers(req, 'GET', method, params)
 
     http = Net::HTTP.new(url.host, url.port)
@@ -117,7 +113,6 @@ class OnePageAPI
     req = Net::HTTP::Post.new(url.path)
     req.body = params.to_json
     req.add_field('Content-Type', 'application/json; charset=utf-8')
-
     add_auth_headers(req, 'POST', method, params)
 
     http = Net::HTTP.new(url.host, url.port)
@@ -147,7 +142,7 @@ class OnePageAPI
     delete_data = params.empty? ? '' : '?' + params.to_a.map {|x| x[0] + '=' +
     URI::escape(x[1], Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.join('&').gsub(/%[0-9A-Fa-f]{2}/) {|x| x.downcase}
 
-    req = Net::HTTP::Delete.new(url.request_uri)
+    req = Net::HTTP::Delete.new(url.path + delete_data)
     add_auth_headers(req, 'DELETE', method, params)
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = @use_ssl
@@ -164,7 +159,6 @@ class OnePageAPI
     params_to_sign = params.empty? ? nil : URI.encode_www_form(params)
     url_to_sign += '?' + params_to_sign unless params_to_sign.nil? || ['POST', 'PUT'].include?(http_method)
 
-    # puts url_to_sign
     timestamp = Time.now.to_i.to_s
 
     token = create_signature(@uid, @api_key, timestamp, http_method, url_to_sign, params)
@@ -173,18 +167,13 @@ class OnePageAPI
     req.add_field('X-OnePageCRM-TS', timestamp)
     req.add_field('X-OnePageCRM-Auth', token)
     req.add_field('X-OnePageCRM-Source', 'lead_clip_chrome')
-
   end
 
-
   def create_signature(uid, api_key, timestamp, request_type, request_url, request_body)
-
     request_url_hash = Digest::SHA1.hexdigest request_url
     request_body_hash = Digest::SHA1.hexdigest request_body.to_json
     signature_message = [uid, timestamp, request_type.upcase, request_url_hash].join '.'
-    signature_message += ('.' + request_body_hash) unless request_body.empty?
+    signature_message += ('.' + request_body_hash) unless request_body.empty?  || ['GET', 'DELETE'].include?(request_type)
     OpenSSL::HMAC.hexdigest('sha256', api_key, signature_message).to_s
   end
-
-
 end
